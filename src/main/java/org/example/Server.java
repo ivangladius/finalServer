@@ -47,7 +47,7 @@ public class Server {
     public void loop() {
         for (; ; ) {
             try {
-                System.out.println("Waiting for Connections..");
+                System.out.println("\nWaiting for Connections..");
                 // if client connected, created a new Thread
                 // and pass the current Server object, and the requesting client socket to it
                 // since we cannot pass arguments to the runnable
