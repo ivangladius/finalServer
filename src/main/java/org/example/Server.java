@@ -23,12 +23,14 @@ public class Server {
 
     public Server(int port, int threadPoolSize) {
 
-        //            db = HSQLDatabase.getInstance();
+        // get database object
+        // singleton pattern
         db = DatabaseFactory.getDatabase();
 
         System.out.println("Database running...");
 
         this.port = port;
+        // create a fixed thread pool with 10 threads waiting to receive a job
         executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadPoolSize);
     }
 
@@ -46,14 +48,21 @@ public class Server {
         for (; ; ) {
             try {
                 System.out.println("Waiting for Connections..");
+                // if client connected, created a new Thread
+                // and pass the current Server object, and the requesting client socket to it
+                // since we cannot pass arguments to the runnable
+                // I just created a class MyRunnable which implements Runnable
+                // and overrides it's run function, so that we can use the
+                // Constructor of the class MyRunnable to pass the arguments to it
                 Socket clientSocket = serverSocket.accept();
                 executor.execute(new MyRunnable(this, clientSocket));
-            } catch (IOException ignore) {
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
 
-    public String[] readFromClient(Socket clientSocket, BufferedReader reader) throws IOException {
+    public String[] readFromClient(BufferedReader reader) throws IOException {
 
         // read data from client (json as string format)
         String result = reader.readLine();
@@ -62,8 +71,6 @@ public class Server {
         int i = result.indexOf("{");
         result = result.substring(i);
         JSONObject json = new JSONObject(result.trim());
-//        System.out.println(json.toString(4));
-
 
         return new String[]{
                 json.get("operation").toString(),
@@ -71,7 +78,7 @@ public class Server {
         };
     }
 
-    public void sendToClient(Socket clientSocket, String operation, String payload,
+    public void sendToClient(String operation, String payload,
                              PrintWriter writer) throws IOException {
 
         JSONObject json = new JSONObject();
@@ -106,7 +113,7 @@ public class Server {
 
         try {
 
-            String[] receivedData = readFromClient(clientSocket, reader);
+            String[] receivedData = readFromClient(reader);
             receivedOperation = receivedData[0];
             receivedPayload = receivedData[1];
 
@@ -157,8 +164,10 @@ public class Server {
                     break;
             }
 
+            System.out.println("operation: " + receivedOperation);
 
-            sendToClient(clientSocket, sendingOperation, sendingPayload, writer);
+
+            sendToClient(sendingOperation, sendingPayload, writer);
 
             if (reader != null && writer != null) {
                 reader.close();
@@ -167,7 +176,6 @@ public class Server {
 
 
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -179,9 +187,7 @@ public class Server {
         // getting "userid passwordToChangeTo"
         String[] info = payload.split(" ");
 
-        db.queryChangePassword(Integer.valueOf(info[0]), info[1]);
-
-        return null;
+        return String.valueOf(db.queryChangePassword(Integer.valueOf(info[0]), info[1]));
     }
 
     private String changeUsername(String payload) {
@@ -204,7 +210,12 @@ public class Server {
 
     private String getEmailByUsername(String payload) {
         System.out.println("GOT CALLED");
-        return db.queryFindEmailByUsername(payload);
+
+        String status = db.queryFindEmailByUsername(payload);
+        if (status == null)
+            return "";
+        else
+            return status;
     }
 
     private void closeClient(Socket cSocket) {
@@ -252,7 +263,7 @@ public class Server {
         if (db.verifyLoginCredentials(cred[0], cred[1]) == 1) {
             return db.queryFindIDByEmail(cred[0]) + " " + db.queryGetUsername(cred[0]);
         }
-        return null;
+        return "";
     }
 
     public String searchUsers(String payload) {
@@ -325,17 +336,27 @@ public class Server {
 
     public String sendMessage(String payload) {
 
+        // payload will be:
+        // "Sender_Id Receiver_Id [msg]"
+        // for eg:
+        // "7 13 [java is cool]"
+
+        // now extract the content in the braces (the message) with regex
         String msg = " ";
         Matcher x = Pattern.compile("\\[(.*?)\\]").matcher(payload);
         if (x.find())
             msg = x.group(1);
 
+
+        // get current time stamp for the message
         Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
         String[] info = payload.split(" ");
 
+        // info[0] is the Sender_Id e.g: 7
+        //info[1] is the Receiver_Id e.g: 13
         db.queryAddMessage(Integer.parseInt(info[0]), msg, Integer.parseInt(info[1]), timeStamp);
 
-        return info[2];
+        return "";
     }
 
     public void showAllMessages() throws SQLException {
@@ -360,12 +381,18 @@ public class Server {
     }
 
     public String getMessages(String payload) {
+        // payload will be the userId of the requesting user in the chat room
+        // and the corresponding partner in the chat room
+        // for e.g: "7 hanspeter"
         String[] prep = payload.split(" ");
+
         Integer id = Integer.valueOf(prep[0]);
         String partner = prep[1];
+
         List<String> messages = db.queryGetMessages(id, partner);
+
         if (messages.size() == 0)
-            return null;
+            return "";
 
         // now build message in a String like that
         // "[user time] [message1]\t[user2 time] [message2]\t
@@ -374,6 +401,7 @@ public class Server {
         StringBuilder reply = new StringBuilder();
         for (String m : messages)
             reply.append(m);
+
 
         return reply.toString();
     }
@@ -391,8 +419,6 @@ public class Server {
 
         public void run() {
             this.server.handle_connection(this.client);
-            // long threadId = Thread.currentThread().getId();
-            // System.out.print("ID: " + threadId + " ");
         }
     }
 }

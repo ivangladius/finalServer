@@ -646,13 +646,10 @@ public class HSQLDatabase implements Database {
                 String username = queryFindUsernameByID(Integer.valueOf(key));
                 String message = rs.getString("message");
                 String timestamp = rs.getString("time");
-                System.out.println("TIME: " + timestamp);
 
                 fullMessage = "[".concat(username + " " + timestamp.substring(11, 16)).concat("]")
                         + " [".concat(message).concat("]\t");
 
-                System.out.println("FULL MESSAGE: " + fullMessage);
-                System.out.println(username + " " + timestamp + ": " + message + "\n");
 
                 timeStamps.add(timestamp + "\n");
                 messages.add(fullMessage);
