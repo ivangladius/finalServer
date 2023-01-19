@@ -48,7 +48,8 @@ public class Server {
         for (; ; ) {
             try {
                 System.out.println("\nWaiting for Connections..");
-                // if client connected, created a new Thread
+                // if client connected, submit the task (function) "handle_connection
+                // to the Thread Pool
                 // and pass the current Server object, and the requesting client socket to it
                 // since we cannot pass arguments to the runnable
                 // I just created a class MyRunnable which implements Runnable

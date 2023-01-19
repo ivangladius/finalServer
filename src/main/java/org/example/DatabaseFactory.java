@@ -9,7 +9,7 @@ public class DatabaseFactory {
 		HSQLDatabase db = null;
 		try {
 			db = HSQLDatabase.getInstance();
-			if (db.connection.isClosed()) {
+			if (db.connection.isClosed()) { // Checks if the connection is closed
 				throw new Exception("Error: Failed to create database connection");
 			}
 		} catch (ClassNotFoundException e) {
@@ -19,6 +19,6 @@ public class DatabaseFactory {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return db;
+		return db; // Returns an instance of the HSQLDatabase object
 	}
 }

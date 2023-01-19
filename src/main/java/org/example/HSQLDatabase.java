@@ -253,8 +253,8 @@ public class HSQLDatabase implements Database {
 
             PreparedStatement userPS = connection.prepareStatement("SELECT * FROM USERS WHERE User_Name = ?");
             userPS.setString(1, username);
-            ResultSet UserRS = userPS.executeQuery();
-            if (UserRS.next() && UserRS.getInt(1) > 0) {
+            ResultSet userRS = userPS.executeQuery();
+            if (userRS.next() && userRS.getInt(1) > 0) {
 
                 userExists = userExists + 1;
 
@@ -450,14 +450,14 @@ public class HSQLDatabase implements Database {
 
         }
         try {
-            // check if username already exist
+            // Checks if the username already exist in the database
+
             PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE User_Name LIKE ?");
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
 
-            // if username already exist return 1
             if (rs.next())
-                    return -1;
+                return -1; // If username already exist in the database then return -1
 
 
             ps = connection.prepareStatement("UPDATE USERS SET User_Name = ? WHERE ID = ?");
@@ -491,11 +491,15 @@ public class HSQLDatabase implements Database {
         }
 
         try {
+
+
+            // Checks if the email exists in the database
+
             PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE Email LIKE ?");
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
 
-            // if username already exist return 1
+            // If email already exists then return -1
             if (rs.next())
                 return -1;
 

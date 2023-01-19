@@ -1,21 +1,17 @@
 package org.example;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Assert;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.Assert;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(OrderAnnotation.class)
 class HSQLDatabaseTest {
@@ -32,9 +28,19 @@ class HSQLDatabaseTest {
 	@Order(2)
 	void databaseSingletonCheck() {
 
-		Database connection1 = DatabaseFactory.getDatabase();
-		Database connection2 = DatabaseFactory.getDatabase();
-		assertTrue(connection1 == connection2);
+		try {
+			Database connection1 = HSQLDatabase.getInstance();
+			Database connection2 = HSQLDatabase.getInstance();
+
+			assertTrue(connection1 == connection2);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			fail();
+
+		}
+
 	}
 
 	@Test
