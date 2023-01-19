@@ -209,7 +209,6 @@ public class Server {
 
 
     private String getEmailByUsername(String payload) {
-        System.out.println("GOT CALLED");
 
         String status = db.queryFindEmailByUsername(payload);
         if (status == null)

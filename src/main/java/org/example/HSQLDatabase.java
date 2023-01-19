@@ -160,7 +160,6 @@ public class HSQLDatabase implements Database {
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                System.out.printf("RETURNING: " + rs.getString(1));
                 return rs.getString(1); // return email
             }
         } catch (SQLException e) {
