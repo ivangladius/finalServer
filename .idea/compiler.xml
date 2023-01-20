@@ -6,8 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="AndroidServer2" />
+        <module name="server" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="AndroidServer2" target="11" />
+    </bytecodeTargetLevel>
   </component>
 </project>
